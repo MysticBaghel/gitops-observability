@@ -1,0 +1,30 @@
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: gitops-demo-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: gitops-demo.rules
+      rules:
+        - alert: GitOpsApplicationDown
+          expr: min(up{namespace="gitops-demo"}) == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "GitOps demo application is down"
+            description: "Prometheus cannot scrape the FastAPI application."
+
+        - alert: GitOpsHighHTTPErrorRate
+          expr: sum(rate(http_requests_total{namespace="gitops-demo",status=~"4xx|5xx"}[5m])) > 0.05
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High HTTP error rate"
+            description: "The FastAPI application is experiencing an elevated HTTP error rate."
+  
