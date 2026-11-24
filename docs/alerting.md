@@ -51,6 +51,35 @@ Open `http://localhost:9090/rules` and find `gitops-demo.rules`.
 
 Current alert states appear at `http://localhost:9090/alerts`.
 
+## Verified alert lifecycle
+
+`GitOpsHighHTTPErrorRate` was exercised end to end by sending requests to a route that does not exist, which produces 4xx responses. The three states below were captured in the Prometheus `/alerts` page.
+
+**Inactive:** no condition is true.
+
+![Alerts inactive](../screenshots/prometheus-alerts-inactive.png)
+
+**Pending:** the condition is true (value about 0.095 errors/s, above the 0.05 threshold) but the 2 minute hold has not elapsed.
+
+![Alert pending](../screenshots/prometheus-alerts-pending.png)
+
+**Firing:** the condition stayed true for the hold duration (value about 0.387 errors/s).
+
+![Alert firing](../screenshots/prometheus-alerts-firing.png)
+
+### Reproduce the test
+
+```bash
+kubectl port-forward -n gitops-demo deployment/gitops-demo 8000:8000 >/dev/null 2>&1 &
+sleep 3
+for i in $(seq 1 100); do curl -s localhost:8000/doesnotexist >/dev/null; sleep 0.5; done
+kill %1
+```
+
+Watch `http://localhost:9090/alerts`. The alert should reach Pending within about a minute and Firing about two minutes later. It returns to Inactive on its own after the five minute rate window passes without new errors.
+
+This test does not exercise `GitOpsApplicationDown`, which needs a pod outage (see below).
+
 ## Testing considerations
 
 The application Deployment is managed by Argo CD in the companion application repository. If automated sync/self-heal is enabled, manually scaling the Deployment may be reverted to the Git-declared replica count.

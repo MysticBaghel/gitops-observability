@@ -178,6 +178,16 @@ The tracing pipeline was successfully verified.
 - Application traces and HTTP operation spans appeared in the Jaeger UI.
 - Multiple traces were successfully collected and inspected.
 
+### Evidence
+
+**Trace search:** 20 traces for service `gitops-demo` in the last hour. The visible traces are `GET /metrics` requests from Prometheus scrapes. Run `make traffic` and search again to see traces for `/` and `/health`.
+
+![Jaeger trace list](../screenshots/jaeger-trace-list.png)
+
+**Trace detail:** one trace opened in the timeline view. It contains 3 spans (the request span plus two ASGI `http send` child spans) and lasted 3.8 ms.
+
+![Jaeger trace detail](../screenshots/jaeger-trace-detail.png)
+
 ## 7. Troubleshooting
 
 ### Jaeger pod not running

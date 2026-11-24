@@ -2,6 +2,23 @@
 
 This guide documents the known local workflow. It assumes the Kubernetes cluster and `kube-prometheus-stack` installation already exist.
 
+## Shortcut: Makefile
+
+The repository root has a `Makefile` that wraps the commands in this guide. Run `make` to list targets.
+
+| Command | Does |
+|---|---|
+| `make up` | Start Minikube |
+| `make status` | Pods in `gitops-demo` and `monitoring`, plus Helm releases |
+| `make open` | Background port-forwards for Grafana (3000), Prometheus (9090), Jaeger (16686) |
+| `make stop` | Stop those port-forwards |
+| `make traffic` | Send 20 requests to `/` and `/health` |
+| `make alerts` | Apply `alerts/app-alerts.yaml` |
+| `make logs-app` / `make logs-alloy` | Tail application or Alloy logs |
+| `make install` | Fresh-cluster Helm install of the whole stack |
+
+Requires GNU `make` (`sudo dnf install make` on Fedora).
+
 ## Prerequisites
 
 - Minikube or another Kubernetes cluster

@@ -45,7 +45,7 @@ PrometheusRule
 
 | Component | Helm Release | Namespace | Version |
 |---|---|---|---|
-| kube-prometheus-stack | kube-prometheus-stack | monitoring | Chart 92.21.2 |
+| kube-prometheus-stack | monitoring | monitoring | Chart 92.21.2 |
 
 Prometheus and Grafana are deployed through the kube-prometheus-stack Helm chart.
 
@@ -77,7 +77,7 @@ helm repo update
 ### Install Monitoring Stack
 
 ```bash
-helm upgrade --install kube-prometheus-stack \
+helm upgrade --install monitoring \
   prometheus-community/kube-prometheus-stack \
   --version 92.21.2 \
   --namespace monitoring \
@@ -85,6 +85,11 @@ helm upgrade --install kube-prometheus-stack \
   -f monitoring/values.yaml \
   --wait --timeout 10m
 ```
+
+> **Release name matters.** The Helm release must be named `monitoring`. The custom alert rules select
+> the label `release: monitoring`, and the service names used below (`monitoring-grafana`,
+> `monitoring-kube-prometheus-prometheus`) are derived from the release name. Installing under a different
+> name creates a second, parallel stack.
 
 ### Verify Deployment
 
@@ -143,7 +148,7 @@ Forward the Grafana service:
 
 ```bash
 kubectl port-forward -n monitoring \
-  svc/kube-prometheus-stack-grafana 3000:80
+  svc/monitoring-grafana 3000:80
 ```
 
 Open Grafana:
@@ -213,7 +218,7 @@ kubectl get prometheusrule -A
 Inspect the configured rules:
 
 ```bash
-kubectl describe prometheusrule -n gitops-demo
+kubectl describe prometheusrule -n monitoring
 ```
 
 Additional alerting documentation is available in [Alerting](../docs/alerting.md).
@@ -228,6 +233,20 @@ The monitoring setup was verified through the following checks:
 - Prometheus collecting application metrics.
 - Grafana dashboards displaying monitoring data.
 - Custom PrometheusRule resources deployed.
+
+### Evidence
+
+**Scrape targets:** the `gitops-demo` ServiceMonitor discovers both application pods (2/2 up).
+
+![Prometheus targets](../screenshots/prometheus-targets.png)
+
+**Rule health:** both custom rules are loaded and evaluating without errors.
+
+![Prometheus rules](../screenshots/prometheus-rules.png)
+
+**Grafana dashboard:** the `GitOps Application Monitoring` dashboard with all five panels populated. The error-rate panel has data because test requests to a non-existent route were sent to generate 4xx responses.
+
+![Grafana dashboard](../screenshots/grafana-dashboard.png)
 
 ## 8. Troubleshooting
 

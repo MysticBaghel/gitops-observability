@@ -205,6 +205,12 @@ The logging pipeline was successfully verified.
 - Grafana Explore displayed application logs.
 - HTTP GET `/metrics` requests with HTTP 200 responses were visible.
 
+### Evidence
+
+Grafana Explore with the Loki datasource, query `{namespace="gitops-demo"}`, last 15 minutes. Most visible lines are Prometheus scraping `/metrics` every few seconds, because that is the steady background traffic. Run `make traffic` to add requests to `/` and `/health`.
+
+![Loki logs in Grafana Explore](../screenshots/loki-logs.png)
+
 ## 7. Troubleshooting
 
 ### Loki shows no data
